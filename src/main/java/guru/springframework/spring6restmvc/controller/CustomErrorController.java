@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
 public class CustomErrorController {
 
     @ExceptionHandler
-    ResponseEntity handleJPAViolations(TransactionSystemException exception){
+    ResponseEntity<Void> handleJPAViolations(TransactionSystemException exception){
         return ResponseEntity.badRequest().build();
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity handleBindErrors(MethodArgumentNotValidException exception){
+    ResponseEntity<List<Map<String, String>>> handleBindErrors(MethodArgumentNotValidException exception){
 
-        List errorList = exception.getFieldErrors().stream()
+        List<Map<String, String>> errorList = exception.getFieldErrors().stream()
                 .map(fieldError -> {
                     Map<String, String > errorMap = new HashMap<>();
                     errorMap.put(fieldError.getField(), fieldError.getDefaultMessage());
