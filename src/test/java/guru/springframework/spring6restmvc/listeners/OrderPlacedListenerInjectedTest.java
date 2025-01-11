@@ -2,7 +2,6 @@ package guru.springframework.spring6restmvc.listeners;
 
 import guru.springframework.spring6restmvc.events.OrderPlacedEvent;
 import guru.springframework.spring6restmvc.model.BeerOrderDTO;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,7 +19,7 @@ import static org.mockito.Mockito.*;
  * Created by jt, Spring Framework Guru.
  */
 @ExtendWith(MockitoExtension.class)
-public class OrderPlacedListenerInjected {
+public class OrderPlacedListenerInjectedTest {
 
     @Mock
     KafkaTemplate<String, Object> kafkaTemplate;
