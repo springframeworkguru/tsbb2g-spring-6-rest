@@ -9,14 +9,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,7 +67,24 @@ class BeerControllerTest {
     }
 
     @Test
-    void listBeers() {
+    void listBeers() throws Exception {
+        //given
+        List<BeerDTO> beerDTOS = List.of(getBeerDto(), getBeerDto());
+
+        Page<BeerDTO> beerPage = new PageImpl<>(beerDTOS, PageRequest.of(0, 10), beerDTOS.size());
+
+        when(beerService.listBeers(any(), any(), any(), any(), any())).thenReturn(beerPage);
+
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                .param("pageSize", "10")
+        .param("pageNumber", "0"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.content[0].id").value(beerDTOS.get(0).getId().toString()))
+                .andExpect(jsonPath("$.content[1].id").value(beerDTOS.get(1).getId().toString()))
+                .andExpect(jsonPath("$.content[0].beerName").value(BEER_NAME ));
+
+
     }
 
     @Test
