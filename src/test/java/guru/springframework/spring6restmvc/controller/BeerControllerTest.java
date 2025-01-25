@@ -1,5 +1,6 @@
 package guru.springframework.spring6restmvc.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.spring6restmvc.model.BeerDTO;
 import guru.springframework.spring6restmvc.model.BeerStyle;
 import guru.springframework.spring6restmvc.services.BeerService;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,9 +47,12 @@ class BeerControllerTest {
     @InjectMocks
     BeerController controller;
 
+    ObjectMapper objectMapper = new ObjectMapper();
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setValidator(new LocalValidatorFactoryBean())
                 .build();
     }
 
@@ -63,7 +69,26 @@ class BeerControllerTest {
     }
 
     @Test
-    void handlePost() {
+    void handlePost() throws Exception {
+        //given
+        BeerDTO beerDTO = getBeerDto();
+        beerDTO.setId(null);
+        beerDTO.setVersion(null);
+
+        String beerDtoJson = objectMapper.writeValueAsString(beerDTO);
+
+        //when
+        when(beerService.saveNewBeer(any())).thenReturn(getBeerDto());
+
+        //then
+        mockMvc.perform(post(BeerController.BEER_PATH)
+                .contentType("application/json")
+                .content(beerDtoJson))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"));
+
+        verify(beerService).saveNewBeer(any());
+
     }
 
     @Test
