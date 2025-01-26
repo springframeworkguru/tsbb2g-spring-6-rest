@@ -61,11 +61,63 @@ class BeerControllerTest {
     }
 
     @Test
-    void deleteById() {
+    void deleteById() throws Exception {
+        //given
+        UUID beerId = UUID.randomUUID();
+
+        //when
+        when(beerService.deleteById(any())).thenReturn(true);
+
+        //then
+        mockMvc.perform(delete(BeerController.BEER_PATH + "/" + beerId))
+                .andExpect(status().isNoContent());
+
+        verify(beerService).deleteById(any());
     }
 
     @Test
-    void updateById() {
+    void deleteByIdNotFound() throws Exception {
+        //given
+        UUID beerId = UUID.randomUUID();
+
+        //when
+        when(beerService.deleteById(any())).thenReturn(false);
+
+        //then
+        mockMvc.perform(delete(BeerController.BEER_PATH + "/" + beerId))
+                .andExpect(status().isNotFound());
+
+        verify(beerService).deleteById(any());
+    }
+
+    @Test
+    void updateById() throws Exception {
+        //given
+        BeerDTO beerDTO = getBeerDto();
+
+        when(beerService.updateBeerById(any(), any())).thenReturn(Optional.of(beerDTO));
+
+        mockMvc.perform(put(BeerController.BEER_PATH + "/" + beerDTO.getId())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(beerDTO)))
+                .andExpect(status().isNoContent());
+
+        verify(beerService).updateBeerById(any(), any());
+    }
+
+    @Test
+    void updateByIdNotFound() throws Exception {
+        //given
+        BeerDTO beerDTO = getBeerDto();
+
+        when(beerService.updateBeerById(any(), any())).thenReturn(Optional.empty());
+
+        mockMvc.perform(put(BeerController.BEER_PATH + "/" + beerDTO.getId())
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(beerDTO)))
+                .andExpect(status().isNotFound());
+
+        verify(beerService).updateBeerById(any(), any());
     }
 
     @Test
