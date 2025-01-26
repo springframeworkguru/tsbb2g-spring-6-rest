@@ -20,6 +20,7 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -57,7 +58,22 @@ class BeerControllerTest {
     }
 
     @Test
-    void updateBeerPatchById() {
+    void updateBeerPatchById() throws Exception {
+        //given
+        Map<String, Object> beerPatch = Map.of("beerName", "New Beer Name",
+                "upc", "123456789012",
+                "price", new BigDecimal("10.99"),
+                "beerStyle", BeerStyle.LAGER);
+
+        when(beerService.patchBeerById(any(), any())).thenReturn(Optional.of(getBeerDto()));
+
+        //then
+        mockMvc.perform(patch(BeerController.BEER_PATH + "/" + UUID.randomUUID())
+                .contentType("application/json")
+                .content(objectMapper.writeValueAsString(beerPatch)))
+                .andExpect(status().isNoContent());
+
+        verify(beerService).patchBeerById(any(), any());
     }
 
     @Test
