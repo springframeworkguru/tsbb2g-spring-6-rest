@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -22,12 +23,14 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * Created by jt, Spring Framework Guru.
  */
+@WithMockUser
 @WebMvcTest(BeerController.class)
 public class BeerControllerSpliceTest {
     public static final String BEER_NAME = "Beer1";
@@ -57,7 +60,8 @@ public class BeerControllerSpliceTest {
         //then
         mockMvc.perform(patch(BeerController.BEER_PATH + "/" + UUID.randomUUID())
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(beerPatch)))
+                        .content(objectMapper.writeValueAsString(beerPatch))
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         verify(beerService).patchBeerById(any(), any());
@@ -72,7 +76,8 @@ public class BeerControllerSpliceTest {
         when(beerService.deleteById(any())).thenReturn(true);
 
         //then
-        mockMvc.perform(delete(BeerController.BEER_PATH + "/" + beerId))
+        mockMvc.perform(delete(BeerController.BEER_PATH + "/" + beerId)
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         verify(beerService).deleteById(any());
@@ -87,7 +92,8 @@ public class BeerControllerSpliceTest {
         when(beerService.deleteById(any())).thenReturn(false);
 
         //then
-        mockMvc.perform(delete(BeerController.BEER_PATH + "/" + beerId))
+        mockMvc.perform(delete(BeerController.BEER_PATH + "/" + beerId)
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
 
         verify(beerService).deleteById(any());
@@ -102,7 +108,8 @@ public class BeerControllerSpliceTest {
 
         mockMvc.perform(put(BeerController.BEER_PATH + "/" + beerDTO.getId())
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(beerDTO)))
+                        .content(objectMapper.writeValueAsString(beerDTO))
+                        .with(csrf()))
                 .andExpect(status().isNoContent());
 
         verify(beerService).updateBeerById(any(), any());
@@ -117,7 +124,8 @@ public class BeerControllerSpliceTest {
 
         mockMvc.perform(put(BeerController.BEER_PATH + "/" + beerDTO.getId())
                         .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(beerDTO)))
+                        .content(objectMapper.writeValueAsString(beerDTO))
+                        .with(csrf()))
                 .andExpect(status().isNotFound());
 
         verify(beerService).updateBeerById(any(), any());
@@ -138,7 +146,8 @@ public class BeerControllerSpliceTest {
         //then
         mockMvc.perform(post(BeerController.BEER_PATH)
                         .contentType("application/json")
-                        .content(beerDtoJson))
+                        .content(beerDtoJson)
+                        .with(csrf()))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
 
