@@ -25,7 +25,6 @@ class BeerRepositoryTest {
         beer.setUpc("123456789012");
         beer.setPrice(new BigDecimal("12.99"));
 
-
         Beer savedBeer = beerRepository.saveAndFlush(beer);
         //beerRepository.flush();
 
